@@ -8,18 +8,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-    @Autowired
-    private UserRepository userRepository;
+
+    private Map<Integer, User> userMap = new HashMap<>();
 
     private User retrieveUserById(Integer id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + String.valueOf(id)));
-        return user;
+        if(userMap.containsKey(id)) {
+            return userMap.get(id);
+        }
+        return null;
     }
 
     /*
@@ -27,7 +28,16 @@ public class UserController {
      */
     @PostMapping
     public User createUser(@RequestBody User user) {
-        return userRepository.save(user);
+        Integer key = new Integer(1);
+
+        for (Integer k : userMap.keySet()) {
+            key = k + 1;
+        }
+
+        user.setId(key);
+        userMap.put(key, user);
+
+        return user;
     }
 
     /*
@@ -35,7 +45,7 @@ public class UserController {
      */
     @GetMapping
     public List<User> getAllUsers() {
-        return (List<User>) userRepository.findAll();
+        return new ArrayList<User>(userMap.values());
     }
 
     @GetMapping("{id}")
@@ -54,7 +64,7 @@ public class UserController {
         updateUser.setFirstName(user.getFirstName());
         updateUser.setEmail(user.getEmail());
 
-        userRepository.save(updateUser);
+        userMap.put(id, updateUser);
 
         return ResponseEntity.ok(updateUser);
     }
@@ -66,7 +76,7 @@ public class UserController {
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable Integer id) {
         User user = this.retrieveUserById(id);
 
-        userRepository.delete(user);
+        userMap.remove(id);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
