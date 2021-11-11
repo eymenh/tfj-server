@@ -16,9 +16,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    private User retrieveUserById(Long id) {
+    private User retrieveUserById(Integer id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not exist with id: " + String.valueOf(id)));
         return user;
     }
 
@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(@PathVariable Integer id) {
         return ResponseEntity.ok(this.retrieveUserById(id));
     }
 
@@ -47,7 +47,7 @@ public class UserController {
      * Update
      */
     @PutMapping("{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<User> updateUser(@PathVariable Integer id, @RequestBody User user) {
         User updateUser = this.retrieveUserById(id);
 
         updateUser.setLastName(user.getLastName());
@@ -63,7 +63,7 @@ public class UserController {
      * Delete
      */
     @DeleteMapping("{id}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Integer id) {
         User user = this.retrieveUserById(id);
 
         userRepository.delete(user);
